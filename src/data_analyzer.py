@@ -5,6 +5,9 @@ import sklearn
 import matplotlib.pyplot as plt
 import scipy.ndimage as sp
 from progress.bar import Bar
+from sklearn.neighbors import RadiusNeighborsClassifier
+from sklearn.neighbors import NearestNeighbors
+from sklearn.cluster import DBSCAN;
 
 DATA_LOCATION_DIR = "../data/"
 UBER_DATA_DIR = DATA_LOCATION_DIR + "NYC Uber-Taxi Data/"
@@ -15,7 +18,7 @@ class data_loader:
         lat = round(((lat - self.lat_range[0])/self.conversion[1]) * self.size[1]);
         return int(long), int(lat);
 
-    def create_map(self, size=(1000, 1000)):
+    def create_map(self, size=(2000, 2000)):
         self.size = size;
         self.conversion = [0, 0];
         self.conversion[0] = (self.long_range[0] - self.long_range[1])
@@ -76,6 +79,9 @@ class data_loader:
         self.valid_date_data = self.date[split:];
         self.valid_size = self.size -split;
 
+        self.train = np.concatenate((self.train_long_data, self.train_lat_data), axis=1);
+        self.valid = np.concatenate((self.valid_long_data, self.valid_lat_data), axis=1);
+        print(self.valid.shape)
     def generate_heatmap(self, figure_size, i, prefix="", sigma=5, show=False, save=True): 
         self.create_map();
         fig = plt.imshow(sp.gaussian_filter(self.underlying_data, sigma=sigma), cmap='jet', interpolation='sinc')
@@ -86,7 +92,20 @@ class data_loader:
         plt.close();
         del fig;
 
-
+class clustering_system:
+    def __init__(self, data_loader, radius=30, min_samples=100):
+        self.radius = radius/110567;
+        self.nn = DBSCAN(eps=self.radius, min_samples=100, n_jobs=4)
+    
+    def fit(self):
+        results = self.nn.fit_predict(data_loader.train_x);
+        return results
 if __name__ == "__main__":
     loader = data_loader();
-    loader.generate_heatmap((800, 800), 0)
+    for j in range(10, 100, 10):
+        for i in range(10, 1000, 10):
+            cluster = clustering_system(data_loader, radius=j, min_samples=i);
+            results = cluster.fit();
+            print(i, j, "Max: ", np.amax(results), "Min", np.amin(results))
+            np.save("../model_results/mode_" + i + "_" + j + ".npy", results);
+    #loader.generate_heatmap((800, 800), 0)
