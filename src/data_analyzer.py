@@ -79,8 +79,12 @@ class data_loader:
         self.valid_date_data = self.date[split:];
         self.valid_size = self.size -split;
 
-        self.train = np.concatenate((self.train_long_data, self.train_lat_data), axis=1);
-        self.valid = np.concatenate((self.valid_long_data, self.valid_lat_data), axis=1);
+        self.train = np.zeros((self.train_size, 2))
+        self.train[:, 0] = self.train_long_data;
+        self.train[:, 1] = self.train_lat_data;
+        self.valid = np.zeros((self.valid_size, 2))
+        self.valid[:, 0] = self.valid_long_data;
+        self.valid[:, 1] = self.valid_lat_data;
         print(self.valid.shape)
     def generate_heatmap(self, figure_size, i, prefix="", sigma=5, show=False, save=True): 
         self.create_map();
@@ -93,19 +97,20 @@ class data_loader:
         del fig;
 
 class clustering_system:
-    def __init__(self, data_loader, radius=30, min_samples=100):
+    def __init__(self, data, radius=30, min_samples=100):
         self.radius = radius/110567;
+        self.data = data;
         self.nn = DBSCAN(eps=self.radius, min_samples=100, n_jobs=4)
     
     def fit(self):
-        results = self.nn.fit_predict(data_loader.train_x);
+        results = self.nn.fit_predict(self.data.train);
         return results
 if __name__ == "__main__":
     loader = data_loader();
     for j in range(10, 100, 10):
         for i in range(10, 1000, 10):
-            cluster = clustering_system(data_loader, radius=j, min_samples=i);
+            cluster = clustering_system(loader, radius=j, min_samples=i);
             results = cluster.fit();
-            print(i, j, "Max: ", np.amax(results), "Min", np.amin(results))
-            np.save("../model_results/mode_" + i + "_" + j + ".npy", results);
+            print("Min Samples: ", i, "Radius", j , "Max: ", np.amax(results), "Min", np.amin(results))
+            np.save("../model_results/mode_" + str(i) + "_" + str(j) + ".npy", results);
     #loader.generate_heatmap((800, 800), 0)
