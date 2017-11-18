@@ -29,7 +29,7 @@ class data_loader:
             bar.next()
         bar.finish()
 
-    def __init__(self, data_dir=UBER_DATA_DIR, validation_split=0.2, max_range=(-0.1, 0.1)):
+    def __init__(self, data_dir=UBER_DATA_DIR, validation_split=0.2, max_range=(-0.07, 0.07)):
         files = listdir(data_dir);
         data_list = [];
         for file in files:
