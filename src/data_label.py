@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Nov 18 21:37:51 2017
-
-@author: qizhen
-"""
 
 import pandas
 import numpy as np
@@ -50,10 +45,11 @@ class data_loader:
         self.lat_data = self.raw_data["Lat"].as_matrix();
         self.date = self.raw_data["Date/Time"].as_matrix();
         
-        ###     
+
+        #lable for number of pickups within same cluster of the next 1 day, and next 7 days    
         self.label1 = np.zeros(self.size)
         self.label7 = np.zeros(self.size)
-        ###
+
 
         mean_long = np.mean(self.long_data);
         self.long_range = [mean_long + max_range[0], mean_long + max_range[1]]
@@ -100,33 +96,42 @@ class data_loader:
         del fig;
         
 if __name__ == "__main__":
-    loader = data_loader();
-    import datetime
-    from datetime import timedelta
-    p1 = 0
-    p7 = 0
-    loader.label1 = np.zeros(loader.size)
-    loader.label7 = np.zeros(loader.size)
-    for i in range (0, 1000):
-        #convert date to datetime
-        loader.date[i]=datetime.datetime.strptime(loader.date[i], "%m/%d/%Y %H:%M:%S")
+    	loader = data_loader();
+	import datetime
+	import numpy as np
+	from datetime import timedelta
+	p1 = 0
+	p7 = 0
+	data = np.load('mode_100_10.npy').tolist();
+
+	for i in range (0, 1000):
+	    #convert date to datetime
+	    loader.date[i]=datetime.datetime.strptime(loader.date[i], "%m/%d/%Y %H:%M:%S")
+	    
+	    check1 = check7 = False
+	    
+	    #update label for pickups happened in last 1 day
+	    for m in range (p1,i):
+		#check if within the past 1 day range
+		if loader.date[m]>=loader.date[i]-datetime.timedelta(days=1):
+			#check if its in the same cluster, if yes increment
+		    if (data[m] == data[i])and data[i]>-1:
+		        loader.label1[m]=loader.label1[m]+1
+			
+			#p1 stores where to check for potential increment in next interation of i
+		    if check1 == False:
+		        check1 = True
+		        p1 = m
+
+	    
+	    
+	    #update label for pickups happened in the last 7 days
+	    for n in range (p7,i):
+		if loader.date[n]>=loader.date[i]-datetime.timedelta(days=7):
+		    if (data[n] == data[i]) and data[i]>-1:
+		        loader.label7[n]=loader.label7[n]+1
+		    if check7 == False:
+		        check7 = True
+		        p1 = n
         
-        check1 = check7 = False
-        
-        #update label for pickups in past 1 day
-        for m in range (p1,i):
-            if loader.date[m]>loader.date[i]-datetime.timedelta(days=1):
-                loader.label1[m]=loader.label1[m]+1
-                if check1 == False:
-                    check1 = True
-                    p1 = m
-    
-        
-                
-         #update label for pickups in past 7 days
-        for n in range (p7,i):
-            loader.label7[n]=loader.label7[n]+1
-            if check7 == False and loader.date[n]>=loader.date[i]-datetime.timedelta(days=1):
-                check7 = True
-                p7 = n
            
