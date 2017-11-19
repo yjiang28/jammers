@@ -1,9 +1,10 @@
 const fs = require("fs");
 
-let labels, locations, clusters=[];
+let labels, locations, predictions, clusters=[];
 
 let labelsFile = "labels.json",
-	locationsFile = "locations.json";
+	locationsFile = "locations.json",
+	predictionFile = "prediction.json";
 
 function readJsonFile(filename){
 	return new Promise((resolve, reject)=>{
@@ -53,6 +54,16 @@ readJsonFile(labelsFile)
 		};
 	}
 	console.log(clusters.length);
+	return readJsonFile(predictionFile);
+}).
+then((buf)=>{
+	predictions = buf;
+	predictions.map(elem=>{
+		let index = elem[0],
+			value = elem[1];
+		clusters[index].prediction = value;
+	});
+	
 	fs.writeFile('clusters.json', JSON.stringify(clusters), (e, res)=>{
 		if(e) console.log('Error: writing clusters.json file');
 		else console.log("Done writing clusters.json file");
