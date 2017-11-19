@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 18 21:37:51 2017
+
+@author: qizhen
+"""
+
 import pandas
 import numpy as np
 from os import listdir
@@ -5,6 +12,7 @@ import sklearn
 import matplotlib.pyplot as plt
 import scipy.ndimage as sp
 from progress.bar import Bar
+
 
 DATA_LOCATION_DIR = "data/"
 UBER_DATA_DIR = DATA_LOCATION_DIR + "NYC Uber-Taxi Data/"
@@ -42,6 +50,11 @@ class data_loader:
         self.lat_data = self.raw_data["Lat"].as_matrix();
         self.date = self.raw_data["Date/Time"].as_matrix();
         
+        ###     
+        self.label1 = np.zeros(self.size)
+        self.label7 = np.zeros(self.size)
+        ###
+
         mean_long = np.mean(self.long_data);
         self.long_range = [mean_long + max_range[0], mean_long + max_range[1]]
         mean_lat = np.mean(self.lat_data);
@@ -75,7 +88,7 @@ class data_loader:
         self.valid_lat_data = self.lat_data[split:];
         self.valid_date_data = self.date[split:];
         self.valid_size = self.size -split;
-
+        
     def generate_heatmap(self, figure_size, i, prefix="", sigma=5, show=False, save=True): 
         self.create_map();
         fig = plt.imshow(sp.gaussian_filter(self.underlying_data, sigma=sigma), cmap='jet', interpolation='sinc')
@@ -85,8 +98,35 @@ class data_loader:
             plt.show()
         plt.close();
         del fig;
-
-
+        
 if __name__ == "__main__":
     loader = data_loader();
-    loader.generate_heatmap((800, 800), 0)
+    import datetime
+    from datetime import timedelta
+    p1 = 0
+    p7 = 0
+    loader.label1 = np.zeros(loader.size)
+    loader.label7 = np.zeros(loader.size)
+    for i in range (0, 1000):
+        #convert date to datetime
+        loader.date[i]=datetime.datetime.strptime(loader.date[i], "%m/%d/%Y %H:%M:%S")
+        
+        check1 = check7 = False
+        
+        #update label for pickups in past 1 day
+        for m in range (p1,i):
+            if loader.date[m]>loader.date[i]-datetime.timedelta(days=1):
+                loader.label1[m]=loader.label1[m]+1
+                if check1 == False:
+                    check1 = True
+                    p1 = m
+    
+        
+                
+         #update label for pickups in past 7 days
+        for n in range (p7,i):
+            loader.label7[n]=loader.label7[n]+1
+            if check7 == False and loader.date[n]>=loader.date[i]-datetime.timedelta(days=1):
+                check7 = True
+                p7 = n
+           
