@@ -86,6 +86,7 @@ class data_loader:
         self.valid[:, 0] = self.valid_long_data;
         self.valid[:, 1] = self.valid_lat_data;
         print(self.valid.shape)
+
     def generate_heatmap(self, figure_size, i, prefix="", sigma=5, show=False, save=True): 
         self.create_map();
         fig = plt.imshow(sp.gaussian_filter(self.underlying_data, sigma=sigma), cmap='jet', interpolation='sinc')
@@ -100,17 +101,26 @@ class clustering_system:
     def __init__(self, data, radius=30, min_samples=100):
         self.radius = radius/110567;
         self.data = data;
-        self.nn = DBSCAN(eps=self.radius, min_samples=100, n_jobs=4)
-    
+        self.nn = DBSCAN(eps=self.radius, min_samples=min_samples, n_jobs=4)
     def fit(self):
         results = self.nn.fit_predict(self.data.train);
         return results
 if __name__ == "__main__":
     loader = data_loader();
-    for j in range(10, 100, 10):
-        for i in range(10, 1000, 10):
+    np.save("../model_results/train", loader.train);
+    np.save("../model_results/valid", loader.valid);    
+
+    # i = 40;
+    # j = 100;
+    # cluster = clustering_system(loader, radius=j, min_samples=i);
+    # results = cluster.fit();
+    # print("Min Samples: ", i, "Radius", j , "Max: ", np.amax(results), "Min", np.amin(results))
+    # np.save("../model_results/model_" + str(i) + "_" + str(j) + ".npy", results);
+
+    for j in range(10, 100, 20):
+        for i in range(20, 200, 20):
             cluster = clustering_system(loader, radius=j, min_samples=i);
             results = cluster.fit();
-            print("Min Samples: ", i, "Radius", j , "Max: ", np.amax(results), "Min", np.amin(results))
-            np.save("../model_results/mode_" + str(i) + "_" + str(j) + ".npy", results);
-    #loader.generate_heatmap((800, 800), 0)
+            print("Percent Unclustered",(results == -1).sum()/results.shape[0], "Min Samples: ", i, "Radius", j , "Max: ", np.amax(results), "Min", np.amin(results))
+            np.save("../model_results/model_" + str(i) + "_" + str(j) + ".npy", results);
+    loader.generate_heatmap((800, 800), 0)
