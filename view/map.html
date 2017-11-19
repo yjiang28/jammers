@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Map</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="index.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<body>
+	<div class="mapWrapper clusterMap">
+		<h3 class="mapTitle">Cluster Map</h3>
+		<div class="map"></div>
+	</div>
+
+	<script>
+		function initMap(){
+			let clusterMapArea = document.getElementsByClassName("clusterMap")[0].getElementsByClassName("map")[0],
+				clusterMap = new google.maps.Map(clusterMapArea, {
+					zoom: 12,
+					center: {
+						lat: 40.7214, 
+						lng: -73.9621
+					}
+				});
+
+			$.post("model/clusters.json", {dataType:"application/json"}, (data)=>{
+				let i=-1;
+				let markers = data.map(elem=>{
+					i++;
+					let marker = new google.maps.Marker({
+						position: elem.location,
+						label: i
+		    		});
+		    		
+		    		let infowindow = new google.maps.InfoWindow({
+						content: "Cluster No."+(i+1)+" : "+elem.numVehicles+" Uber pick-ups in 4/1/2014-9/30/2014"
+					});
+					
+					marker.addListener('click', function() {
+						infowindow.open(clusterMap, marker);
+					});
+					return marker;
+				});
+
+				var markerCluster = new MarkerClusterer(clusterMap, markers,{imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+			});
+		}
+	</script>
+
+	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHXO9qz57T_3ympCiN5wlcBddHHHrp24g&callback=initMap"></script>
+	<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
+    </script>
+	<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHXO9qz57T_3ympCiN5wlcBddHHHrp24g&libraries=visualization&callback=initMap">
+    </script>
+
+
+</body>
+</html>

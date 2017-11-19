@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css?family=Spectral+SC');
+
+html, body{
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+a{
+	font-family: 'Spectral SC', serif;
+	font-size: 26px;	
+	text-decoration: none;
+	color: black;
+	box-shadow: 5px 5px 5px #888888;
+	border-radius: 3px;
+}
+
+.mapWrapper{
+	height: 96%;
+	width: 90%;
+
+	& .mapTitle{
+		text-alignment: center;
+		height: 2%;
+		margin: 0;
+
+		font-family: 'Spectral SC', serif;
+		font-size: 26px;
+	}
+
+	& .map{
+		height: 94%;
+		width: 100%;
+		box-shadow: 10px 10px 10px #888888;
+		border-radius: 6px;
+	}
+
+}
+
+.mapWrapper, .btnWrapper{
+	position: absolute;	
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0;
+}
