@@ -132,6 +132,6 @@ if __name__ == "__main__":
 		        loader.label7[n]=loader.label7[n]+1
 		    if check7 == False:
 		        check7 = True
-		        p1 = n
+		        p7 = n
         
            
